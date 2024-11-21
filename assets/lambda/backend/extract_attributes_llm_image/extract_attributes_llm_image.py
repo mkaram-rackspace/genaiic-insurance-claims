@@ -131,9 +131,9 @@ def lambda_handler(event, context):
     prompt_template = load_prompt_template()
     LOGGER.info(f"Prompt template: {prompt_template}")
 
-    # filled_template = filled_prompt(
-    #     template=prompt_template.template,
-    # )
+    filled_template = filled_prompt(
+        template=prompt_template.template,
+    )
 
     messages = [SystemMessage(content=SYSTEM_PROMPT)]
 
@@ -163,7 +163,7 @@ def lambda_handler(event, context):
     #     messages.extend(example_messages)
 
     # read example
-    human_message = create_human_message_with_imgs(prompt_template, file, max_pages=20)
+    human_message = create_human_message_with_imgs(filled_template, file, max_pages=20)
     messages.append(human_message)
     LOGGER.info("Calling LLM")
     response = llm.invoke(messages)
