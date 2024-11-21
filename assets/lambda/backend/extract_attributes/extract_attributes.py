@@ -21,7 +21,7 @@ from langchain import LLMChain
 from langchain_aws import ChatBedrock
 from model.bedrock import create_bedrock_client, get_model_params
 from model.parser import parse_json_string
-from prompt import load_prompt_template
+from prompt_summary import load_prompt_template
 from utils import filled_prompt, token_count_tokenizer, truncate_document
 
 LOGGER = logging.Logger("ENTITY-EXTRACTION", level=logging.DEBUG)
@@ -135,21 +135,8 @@ def lambda_handler(event, context):  # noqa: C901
     )
 
     # prepare prompt template
-    prompt_template = load_prompt_template(num_few_shots=len(few_shots), instructions=instructions)
-    LOGGER.info(f"Prompt template: {prompt_template}")
-
-    filled_template = filled_prompt(
-        few_shots=few_shots,
-        attributes=attributes,
-        instructions=instructions,
-        template=prompt_template.template,
-        document=document,
-    )
-
-    # count total tokens in filled prompt and document
-    token_count_doc = token_count_tokenizer(document, model=model_id)
-    token_count_total = token_count_tokenizer(filled_template, model=model_id)
-    LOGGER.info(f"Filled prompt template + document token count: {token_count_total}")
+    prompt_template = load_prompt_template(event)
+    LOGGER.info(f"Prompt: {prompt_template}")
 
     document = truncate_document(
         document=document,
@@ -158,20 +145,14 @@ def lambda_handler(event, context):  # noqa: C901
         num_token_prompt=token_count_total - token_count_doc,
         max_token_model=MAX_DOC_LENGTH_DIC[model_id] * 0.75,
     )
+
+    attributes_str = "claimer name, car model, accident description"
     prompt_variables = {
-        "document": document,
         "attributes": attributes_str,
     }
+
     if instructions.strip():
         prompt_variables["instructions"] = instructions
-    for i, shot in enumerate(few_shots):
-        prompt_variables.update(
-            {
-                f"few_shot_input_{i}": json.dumps(shot["input"], indent=4),
-                f"few_shot_output_{i}": json.dumps(shot["output"], indent=4),
-            }
-        )
-        LOGGER.info(f"Few shot {i}: {shot}")
 
     # run entity extraction
     LOGGER.info(f"Calling the LLM {model_id} to extract attributes...")
