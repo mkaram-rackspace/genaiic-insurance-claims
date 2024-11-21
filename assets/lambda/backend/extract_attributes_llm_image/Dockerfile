@@ -12,4 +12,4 @@ COPY . ${LAMBDA_TASK_ROOT}
 
 
 # Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
-CMD [ "extract_attributes_llm.lambda_handler" ]
+CMD [ "extract_attributes_llm_image.lambda_handler" ]
