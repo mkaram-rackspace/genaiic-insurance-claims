@@ -658,6 +658,10 @@ with col1:
     submit_disabled = not any(st.session_state["docs"])  # or not any(st.session_state["attributes"])
     if st.button(":rocket: Extract attributes", disabled=False, use_container_width=True):
         RUN_EXTRACTION = True
+        LOGGER.info("State")
+        for k, v in dict(st.session_state).items():
+            LOGGER.info(f"{k}={v}")
+        run_extraction()
 with col3:
     clear_disabled = not any(st.session_state["docs"]) and not st.session_state["parsed_response"]
     for i in range(MAX_ATTRIBUTES):
@@ -668,12 +672,6 @@ with col3:
             break
     st.button(":wastebasket: Clear results", on_click=clear_results, disabled=clear_disabled, use_container_width=True)
 
-# show work in progress
-if RUN_EXTRACTION:
-    LOGGER.info("State")
-    for k, v in dict(st.session_state).items():
-        LOGGER.info(f"{k}={v}")
-    run_extraction()
 
 # show model response
 if st.session_state.get("parsed_response"):
