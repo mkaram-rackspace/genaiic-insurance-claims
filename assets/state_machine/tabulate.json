@@ -14,32 +14,24 @@
             "Type": "Choice",
             "Choices": [
               {
-                "And": [
+                "Or": [
                   {
-                    "Or": [
-                      {
-                        "Variable": "$.file_name",
-                        "StringMatches": "*/*.jpg"
-                      },
-                      {
-                        "Variable": "$.file_name",
-                        "StringMatches": "*/*.png"
-                      },
-                      {
-                        "Variable": "$.file_name",
-                        "StringMatches": "*/*.pdf"
-                      }
-                    ]
+                    "Variable": "$.file_name",
+                    "StringMatches": "*/*.png"
                   },
                   {
-                    "Variable": "$.parsing_mode",
-                    "StringEquals": "Amazon Bedrock"
+                    "Variable": "$.file_name",
+                    "StringMatches": "*/*.jpg"
                   }
                 ],
-                "Next": "Extract-entities-multimodal"
+                "Next": "Extract-text-from-img"
               },
               {
                 "Or": [
+                  {
+                    "Variable": "$.file_name",
+                    "StringMatches": "*/*.pdf"
+                  },
                   {
                     "Variable": "$.file_name",
                     "StringMatches": "*/*.doc"
@@ -47,53 +39,34 @@
                   {
                     "Variable": "$.file_name",
                     "StringMatches": "*/*.docx"
-                  },
-                  {
-                    "Variable": "$.file_name",
-                    "StringMatches": "*/*.ppt"
-                  },
-                  {
-                    "Variable": "$.file_name",
-                    "StringMatches": "*/*.pptx"
-                  },
-                  {
-                    "Variable": "$.file_name",
-                    "StringMatches": "*/*.xls"
-                  },
-                  {
-                    "Variable": "$.file_name",
-                    "StringMatches": "*/*.html"
-                  },
-                  {
-                    "Variable": "$.file_name",
-                    "StringMatches": "*/*.htm"
-                  },
-                  {
-                    "Variable": "$.file_name",
-                    "StringMatches": "*/*.md"
-                  },
-                  {
-                    "Variable": "$.file_name",
-                    "StringMatches": "*/*.markdown"
-                  },
-                  {
-                    "Variable": "$.file_name",
-                    "StringMatches": "*/*.xlsx"
                   }
                 ],
-                "Next": "Convert-office"
+                "Next": "Extract-text"
+              },
+              {
+                "Or": [
+                  {
+                    "Variable": "$.file_name",
+                    "StringMatches": "*/*.wav"
+                  },
+                  {
+                    "Variable": "$.file_name",
+                    "StringMatches": "*/*.mp3"
+                  }
+                ],
+                "Next": "Extract-audio"
               }
             ],
             "Default": "Extract-text"
           },
-          "Convert-office": {
+          "Extract-text-from-img": {
             "Type": "Task",
             "Resource": "arn:aws:states:::lambda:invoke",
             "Parameters": {
               "Payload": {
                 "body.$": "$"
               },
-              "FunctionName": "${LAMBDA_READ_OFFICE}"
+              "FunctionName": "${LAMBDA_EXTRACT_ATTRIBUTES_LLM_IMG}"
             },
             "Retry": [
               {
@@ -112,7 +85,7 @@
               "merged.$": "States.JsonMerge($$.Execution.Input, States.StringToJson($.Payload.body), false)"
             },
             "OutputPath": "$.merged",
-            "Next": "Extract-entities"
+            "End": true
           },
           "Extract-text": {
             "Type": "Task",
@@ -136,66 +109,20 @@
                 "BackoffRate": 2
               }
             ],
-            "Next": "Extract-entities",
+            "End": true,
             "ResultSelector": {
               "merged.$": "States.JsonMerge($$.Execution.Input, States.StringToJson($.Payload.body), false)"
             },
             "OutputPath": "$.merged"
           },
-          "Extract-entities": {
+          "Extract-audio": {
             "Type": "Task",
             "Resource": "arn:aws:states:::lambda:invoke",
             "Parameters": {
               "Payload": {
                 "body.$": "$"
               },
-              "FunctionName": "${LAMBDA_EXTRACT_ATTRIBUTES}"
-            },
-            "Retry": [
-              {
-                "ErrorEquals": [
-                  "Lambda.ServiceException",
-                  "Lambda.AWSLambdaException",
-                  "Lambda.SdkClientException",
-                  "Lambda.TooManyRequestsException"
-                ],
-                "IntervalSeconds": 1,
-                "MaxAttempts": 3,
-                "BackoffRate": 2
-              },
-              {
-                "ErrorEquals": [
-                  "States.TaskFailed"
-                ],
-                "BackoffRate": 2,
-                "IntervalSeconds": 1,
-                "MaxAttempts": 3,
-                "JitterStrategy": "FULL"
-              }
-            ],
-            "ResultSelector": {
-              "llm_answer.$": "States.StringToJson($.Payload.body)"
-            },
-            "Catch": [
-              {
-                "ErrorEquals": [
-                  "States.TaskFailed"
-                ],
-                "Comment": "Catch Lambda failed execution",
-                "ResultPath": "$.error",
-                "Next": "Pass"
-              }
-            ],
-            "End": true
-          },
-          "Extract-entities-multimodal": {
-            "Type": "Task",
-            "Resource": "arn:aws:states:::lambda:invoke",
-            "Parameters": {
-              "Payload": {
-                "body.$": "$"
-              },
-              "FunctionName": "${LAMBDA_EXTRACT_ATTRIBUTES_LLM}"
+              "FunctionName": "${LAMBDA_RUN_TRANSCRIBE}"
             },
             "Retry": [
               {
@@ -244,7 +171,7 @@
           }
         }
       },
-      "End": true,
+      "Next": "Extract-entities",
       "ItemsPath": "$.documents",
       "ItemSelector": {
         "file_name.$": "$$.Map.Item.Value",
@@ -253,6 +180,52 @@
         "parsing_mode.$": "$.parsing_mode"
       },
       "MaxConcurrency": 10
+    },
+    "Extract-entities": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "Payload": {
+          "body.$": "$"
+        },
+        "FunctionName": "${LAMBDA_EXTRACT_ATTRIBUTES}"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 1,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        },
+        {
+          "ErrorEquals": [
+            "States.TaskFailed"
+          ],
+          "BackoffRate": 2,
+          "IntervalSeconds": 1,
+          "MaxAttempts": 3,
+          "JitterStrategy": "FULL"
+        }
+      ],
+      "ResultSelector": {
+        "llm_answer.$": "States.StringToJson($.Payload.body)"
+      },
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.TaskFailed"
+          ],
+          "Comment": "Catch Lambda failed execution",
+          "ResultPath": "$.error",
+          "Next": "Pass"
+        }
+      ],
+      "End": true
     }
   }
 }

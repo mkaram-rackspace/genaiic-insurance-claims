@@ -341,6 +341,66 @@ class TabulateAPIConstructs(Construct):
             description="Alias used for Lambda provisioned concurrency",
         )
 
+        ## ********* Process with Transcribe *********
+        self.transcribe_lambda = _lambda.Function(
+            self,
+            f"{self.stack_name}-transcribe-lambda",
+            runtime=self._python_runtime,
+            code=_lambda.Code.from_asset("./assets/lambda/backend/run_transcribe"),
+            handler="run_transcribe.lambda_handler",
+            function_name=f"{self.stack_name}-run-transcribe",
+            memory_size=3008,
+            timeout=Duration.seconds(TEXTRACT_TIMEOUT),
+            environment={
+                "BUCKET_NAME": self.s3_data_bucket.bucket_name,
+                "TEXTRACT_REGION": self.textract_region,
+                "TABLE_FLATTEN_HEADERS": str(self.table_flatten_headers),
+                "TABLE_REMOVE_COLUMN_HEADERS": str(self.table_remove_column_headers),
+                "TABLE_DUPLICATE_TEXT_IN_MERGED_CELLS": str(self.table_duplicate_text_in_merged_cells),
+                "HIDE_FOOTER_LAYOUT": str(self.hide_footer_layout),
+                "HIDE_HEADER_LAYOUT": str(self.hide_header_layout),
+                "HIDE_PAGE_NUM_LAYOUT": str(self.hide_page_num_layout),
+                "USE_TABLE": str(self.use_table),
+            },
+            role=self.lambda_textract_role, # TODO: fix the role
+            layers=self.textract_only_code_layers,
+        )
+        self.transcribe_lambda.add_alias(
+            "Warm",
+            provisioned_concurrent_executions=0,
+            description="Alias used for Lambda provisioned concurrency",
+        )
+
+        ## ********* Process with extract attriutes llm img *********
+        self.extract_attributes_llm_image = _lambda.Function(
+            self,
+            f"{self.stack_name}-textract-attributes-llm-img-lambda",
+            runtime=self._python_runtime,
+            code=_lambda.Code.from_asset("./assets/lambda/backend/extract_attributes_llm_image"),
+            handler="extract_attributes_llm_image.lambda_handler",
+            function_name=f"{self.stack_name}-textract-attributes-llm-img-lambda",
+            memory_size=3008,
+            timeout=Duration.seconds(TEXTRACT_TIMEOUT),
+            environment={
+                "BUCKET_NAME": self.s3_data_bucket.bucket_name,
+                "TEXTRACT_REGION": self.textract_region,
+                "TABLE_FLATTEN_HEADERS": str(self.table_flatten_headers),
+                "TABLE_REMOVE_COLUMN_HEADERS": str(self.table_remove_column_headers),
+                "TABLE_DUPLICATE_TEXT_IN_MERGED_CELLS": str(self.table_duplicate_text_in_merged_cells),
+                "HIDE_FOOTER_LAYOUT": str(self.hide_footer_layout),
+                "HIDE_HEADER_LAYOUT": str(self.hide_header_layout),
+                "HIDE_PAGE_NUM_LAYOUT": str(self.hide_page_num_layout),
+                "USE_TABLE": str(self.use_table),
+            },
+            role=self.lambda_textract_role, # TODO: fix the role
+            layers=self.textract_only_code_layers,
+        )
+        self.extract_attributes_llm_image.add_alias(
+            "Warm",
+            provisioned_concurrent_executions=0,
+            description="Alias used for Lambda provisioned concurrency",
+        )
+
     ## **************** IAM Permissions ****************
     def create_roles(self: str):
         ## ********* IAM Roles *********
@@ -530,10 +590,11 @@ class TabulateAPIConstructs(Construct):
             id=f"{self.stack_name}-StepFunctions",
             definition_body=sfn.DefinitionBody.from_file("assets/state_machine/tabulate.json"),
             definition_substitutions={
-                "LAMBDA_READ_OFFICE": self.read_office_lambda.function_arn,
+                "LAMBDA_EXTRACT_ATTRIBUTES_LLM_IMG": self.extract_attributes_llm_image.function_arn, # TODO
                 "LAMBDA_RUN_TEXTRACT": self.textract_lambda.function_arn,
+                "LAMBDA_RUN_TRANSCRIBE": self.run_transcribe.function_arn, # TODO
                 "LAMBDA_EXTRACT_ATTRIBUTES": self.attributes_lambda.function_arn,
-                "LAMBDA_EXTRACT_ATTRIBUTES_LLM": self.llm_attributes_lambda.function_arn,
+                # "LAMBDA_EXTRACT_ATTRIBUTES_LLM": self.llm_attributes_lambda.function_arn,
             },
             role=self.stepfunctions_role,
             state_machine_name=f"{self.stack_name}-StepFunctions",
