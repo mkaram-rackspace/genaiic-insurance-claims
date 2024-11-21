@@ -1,4 +1,3 @@
-pdf2image
 langchain==0.1.14
 langchain-community==0.0.31
 boto3==1.34.90

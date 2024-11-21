@@ -1,27 +1,27 @@
 import base64
 from io import BytesIO
-from pdf2image import convert_from_path
+# from pdf2image import convert_from_path
 
 
-def get_base64_encoded_images_from_pdf(pdf_file_path):
-    images = convert_from_path(pdf_file_path)
-    base64_img_strs = []
-    for i, image in enumerate(images):
-        buffered = BytesIO()
+# def get_base64_encoded_images_from_pdf(pdf_file_path):
+#     images = convert_from_path(pdf_file_path)
+#     base64_img_strs = []
+#     for i, image in enumerate(images):
+#         buffered = BytesIO()
 
-        image.save(buffered, format="JPEG")
-        img_str = base64.b64encode(buffered.getvalue())
-        base64_string = img_str.decode('utf-8')
-        base64_img_strs.append(base64_string)
-    return base64_img_strs
+#         image.save(buffered, format="JPEG")
+#         img_str = base64.b64encode(buffered.getvalue())
+#         base64_string = img_str.decode('utf-8')
+#         base64_img_strs.append(base64_string)
+#     return base64_img_strs
 
 
 def create_human_message_with_imgs(text, file=None, max_pages=20):
     content = []
     if file:
-        if file.lower().endswith('.pdf'):
-            base64_img_strs = get_base64_encoded_images_from_pdf(file)
-        elif file.lower().endswith(".jpeg") or file.lower().endswith(".jpg") or file.lower().endswith(".png"):
+        # if file.lower().endswith('.pdf'):
+        #     base64_img_strs = get_base64_encoded_images_from_pdf(file)
+        if file.lower().endswith(".jpeg") or file.lower().endswith(".jpg") or file.lower().endswith(".png"):
             with open(file, "rb") as image_file:
                 binary_data = image_file.read()
                 base64_img_str = base64.b64encode(binary_data)

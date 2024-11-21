@@ -22,6 +22,10 @@
                   {
                     "Variable": "$.file_name",
                     "StringMatches": "*/*.jpg"
+                  },
+                  {
+                    "Variable": "$.file_name",
+                    "StringMatches": "*/*.jpeg"
                   }
                 ],
                 "Next": "Extract-text-from-img"
