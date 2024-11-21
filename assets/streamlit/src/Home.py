@@ -53,10 +53,10 @@ authenticate.set_st_state_vars()
 #########################
 
 # titles
-COVER_IMAGE = os.environ.get("COVER_IMAGE_URL")
+COVER_IMAGE = "https://placehold.co/1400x350/6C91C2/white/?text=Promptformers%20Agent%20Assistant"
 ASSISTANT_AVATAR = os.environ.get("ASSISTANT_AVATAR_URL")
-PAGE_TITLE = "Tabulate"
-PAGE_ICON = ":sparkles:"
+PAGE_TITLE = "Promptformers Agent Assistant"
+PAGE_ICON = "🚗"
 
 # page config
 st.set_page_config(

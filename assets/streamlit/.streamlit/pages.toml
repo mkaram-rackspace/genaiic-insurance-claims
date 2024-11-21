@@ -5,5 +5,5 @@ icon = "🏠"
 
 [[pages]]
 path = "src/app_pages/Tabulate.py"
-name = "Tabulate"
-icon = "🚀"
+name = "Agent Assistant"
+icon = "🚗"
