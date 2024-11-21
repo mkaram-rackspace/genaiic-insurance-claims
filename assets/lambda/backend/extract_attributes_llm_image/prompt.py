@@ -3,16 +3,16 @@ from langchain import PromptTemplate
 
 PROMPT_DEFAULT_HEADER = """Extract attributes from the attached images and remember to provide a valid JSON file in the following example format:
 <json>
-"Headlights": {
+"Headlights": \{
     "severity_of_damage": "Severe",
     "nature_of_damage": "Collision",
     "description_of_damage": "Both headlights are shattered and non-functional, indicating a high-impact collision."
-    },
-"Windshield": {
+    \},
+"Windshield": \{
     "severity_of_damage": "Moderate",
     "nature_of_damage": "Debris",
     "description_of_damage": "The windshield has a large crack caused by flying debris."
-    }
+    \}
 </json>
 """
 
@@ -66,8 +66,6 @@ If the attribute has multiple values, provide them as a list in this format: ["v
 If the attribute requires providing a description or free-form text, the value of the attribute must contain this text.
 If provided, you must also follow the additional instructions in <instructions></instructions>.
 Think step by step. First, summarize your thoughts in 2-3 sentences using <thinking></thinking> tags. Next, output the JSON in <json></json> tags. Do NOT include any other information in the answer. Remember that the response MUST be a valid JSON file.
-
-example output format:
 
 """
 
