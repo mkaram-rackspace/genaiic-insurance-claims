@@ -222,10 +222,23 @@
           ],
           "Comment": "Catch Lambda failed execution",
           "ResultPath": "$.error",
-          "End": true
+          "Next": "FailState"
         }
       ],
-      "End": true
+      "Next": "PassState"
+    },
+    "FailState": {
+      "Type": "Fail",
+      "Cause": "Invalid response.",
+      "Error": "ErrorA"
+    },
+    "PassState": {
+      "Type": "Pass",
+      "End": true,
+      "Parameters": {
+        "file_name.$": "$.file_name",
+        "error.$": "$.error"
+      }
     }
   }
 }
