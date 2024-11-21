@@ -375,9 +375,9 @@ class TabulateAPIConstructs(Construct):
         ## ********* Process with extract attriutes llm img *********
         self.extract_attributes_llm_image = _lambda.DockerImageFunction(
             self,
-            f"{self.stack_name}-textract-attributes-llm-img-lambda",
+            f"{self.stack_name}-extract-attributes-llm-img-lambda",
             code=_lambda.DockerImageCode.from_image_asset("./assets/lambda/backend/extract_attributes_llm_image"),
-            function_name=f"{self.stack_name}-textract-attributes-llm-img-lambda",
+            function_name=f"{self.stack_name}-extract-attributes-llm-img-lambda",
             memory_size=3008,
             timeout=Duration.seconds(TEXTRACT_TIMEOUT),
             environment={
