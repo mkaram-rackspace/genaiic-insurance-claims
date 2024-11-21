@@ -135,7 +135,7 @@ def format_few_shots(few_shots: list = []) -> dict:
 
 
 def filled_prompt(
-    template: str = "",  document: str = ""
+    few_shots: list = [], attributes: str = "", template: str = "", instructions: str = "", document: str = ""
 ) -> str:
     """
     Fills the prompt template with the few shots and attributes
@@ -158,4 +158,6 @@ def filled_prompt(
     str
         the filled prompt template
     """
-    return template.format(document=document)
+
+    few_shots_dic = format_few_shots(few_shots=few_shots)
+    return template.format(**few_shots_dic, attributes=attributes, instructions=instructions, document=document)

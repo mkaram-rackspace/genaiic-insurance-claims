@@ -101,6 +101,7 @@ def lambda_handler(event, context):
 
     file_key = body.get("file_name")
     client_id = body.get("client_id")
+
     # prompt = body.get("prompt", PROMPT)
     # system_prompt = body.get("system_prompt", SYSTEM_PROMPT)
     # get fixed model params
