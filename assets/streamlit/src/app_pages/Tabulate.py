@@ -73,6 +73,7 @@ authenticate.set_st_state_vars()
 #########################
 
 # titles
+# COVER_IMAGE = os.environ.get("COVER_IMAGE_URL")
 COVER_IMAGE = "https://placehold.co/1400x350/6C91C2/white/?text=Promptformers%20Agent%20Assistant"
 ASSISTANT_AVATAR = os.environ.get("ASSISTANT_AVATAR_URL")
 PAGE_TITLE = "Promptformers Agent Assistant"
@@ -395,11 +396,11 @@ def run_extraction() -> None:
 with st.sidebar:
     st.header("Settings")
     st.subheader("Information Extraction")
-    st.selectbox(
-        label="Parsing algorithm:",
-        options=["Amazon Textract", "Amazon Bedrock"],
-        key="parsing_mode",
-    )
+    # st.selectbox(
+    #     label="Parsing algorithm:",
+    #     options=["Amazon Textract", "Amazon Bedrock"],
+    #     key="parsing_mode",
+    # )
     st.selectbox(
         label="Language model:",
         options=MODELS_DISPLAYED,
@@ -464,10 +465,11 @@ tabs = [
 if st.session_state["advanced_mode"]:
     tab_docs, tab_attributes, tab_instructions, tab_few_shots = st.tabs(tabs)
 else:
-    tab_docs, tab_attributes = st.tabs(tabs[:2])
+    tab_docs = st.tabs([tabs[0]])[0]
 
 # documents
 with tab_docs:
+    st.session_state["parsing_mode"] = "Amazon Textract"
     st.radio(
         label="Please provide the input documents by uploading the files or entering the texts manually.",
         label_visibility="visible",
@@ -523,57 +525,57 @@ with tab_docs:
     LOGGER.info(f"Docs: {st.session_state['docs']}")
 
 # attributes
-with tab_attributes:
-    st.radio(
-        label="Please provide the attributes to be extracted, including name and description (e.g. explanation, possible values, examples).",  # noqa: E501
-        label_visibility="visible",
-        key="attributes_input_type",
-        options=["Upload attributes", "Enter attributes manually"],
-        index=1,
-    )
-    if st.session_state["attributes_input_type"] == "Upload attributes":
-        st.markdown(
-            "Note: the attributes must be formatted as JSON list and contain two fields: **name** and **description**"  # noqa: E501
-        )
-        attributes = st.file_uploader(
-            label="Upload your attributes:",
-            accept_multiple_files=False,
-            key=f"attributes_{st.session_state['attributes_uploader_key']}",
-            type=["json"],
-        )
-        attributes_placeholder = st.empty()
-        if attributes is not None:
-            with attributes_placeholder.container():
-                st.session_state["attributes"] = json.load(attributes)
-                st.session_state["num_attributes"] = len(st.session_state["attributes"])
-                for idx in range(st.session_state["num_attributes"]):
-                    entity_dict = fill_attribute_fields(idx)
-    else:
-        attributes_placeholder = st.empty()
-        col_add, col_remove, _ = st.columns([0.11, 0.12, 0.70])
-        with col_add:
-            if st.button(
-                ":heavy_plus_sign: Add",
-                key="add_attribute",
-                disabled=st.session_state["num_attributes"] == MAX_ATTRIBUTES,
-                use_container_width=True,
-            ):
-                st.session_state["num_attributes"] += 1
-        with col_remove:
-            if st.button(
-                ":heavy_minus_sign: Remove",
-                key="remove_attribute",
-                disabled=st.session_state["num_attributes"] == 1,
-                use_container_width=True,
-            ):
-                st.session_state["num_attributes"] = max(1, st.session_state["num_attributes"] - 1)
-        with attributes_placeholder.container():
-            st.session_state["attributes"] = []
-            for idx in range(st.session_state["num_attributes"]):
-                entity_dict = show_attribute_fields(idx)
-                if entity_dict["name"].strip() and entity_dict["description"].strip():
-                    st.session_state["attributes"].append(entity_dict)
-    LOGGER.info(f"Attributes: {st.session_state['attributes']}")
+# with tab_attributes:
+#     st.radio(
+#         label="Please provide the attributes to be extracted, including name and description (e.g. explanation, possible values, examples).",  # noqa: E501
+#         label_visibility="visible",
+#         key="attributes_input_type",
+#         options=["Upload attributes", "Enter attributes manually"],
+#         index=1,
+#     )
+#     if st.session_state["attributes_input_type"] == "Upload attributes":
+#         st.markdown(
+#             "Note: the attributes must be formatted as JSON list and contain two fields: **name** and **description**"  # noqa: E501
+#         )
+#         attributes = st.file_uploader(
+#             label="Upload your attributes:",
+#             accept_multiple_files=False,
+#             key=f"attributes_{st.session_state['attributes_uploader_key']}",
+#             type=["json"],
+#         )
+#         attributes_placeholder = st.empty()
+#         if attributes is not None:
+#             with attributes_placeholder.container():
+#                 st.session_state["attributes"] = json.load(attributes)
+#                 st.session_state["num_attributes"] = len(st.session_state["attributes"])
+#                 for idx in range(st.session_state["num_attributes"]):
+#                     entity_dict = fill_attribute_fields(idx)
+#     else:
+#         attributes_placeholder = st.empty()
+#         col_add, col_remove, _ = st.columns([0.11, 0.12, 0.70])
+#         with col_add:
+#             if st.button(
+#                 ":heavy_plus_sign: Add",
+#                 key="add_attribute",
+#                 disabled=st.session_state["num_attributes"] == MAX_ATTRIBUTES,
+#                 use_container_width=True,
+#             ):
+#                 st.session_state["num_attributes"] += 1
+#         with col_remove:
+#             if st.button(
+#                 ":heavy_minus_sign: Remove",
+#                 key="remove_attribute",
+#                 disabled=st.session_state["num_attributes"] == 1,
+#                 use_container_width=True,
+#             ):
+#                 st.session_state["num_attributes"] = max(1, st.session_state["num_attributes"] - 1)
+#         with attributes_placeholder.container():
+#             st.session_state["attributes"] = []
+#             for idx in range(st.session_state["num_attributes"]):
+#                 entity_dict = show_attribute_fields(idx)
+#                 if entity_dict["name"].strip() and entity_dict["description"].strip():
+#                     st.session_state["attributes"].append(entity_dict)
+#     LOGGER.info(f"Attributes: {st.session_state['attributes']}")
 
 # instructions
 if st.session_state["advanced_mode"]:
@@ -654,7 +656,7 @@ st.markdown("")
 col1, col2, col3 = st.columns([0.20, 0.60, 0.20])
 with col1:
     submit_disabled = not any(st.session_state["docs"]) or not any(st.session_state["attributes"])
-    if st.button(":rocket: Extract attributes", disabled=submit_disabled, use_container_width=True):
+    if st.button(":rocket: Extract attributes", disabled=False, use_container_width=True):
         RUN_EXTRACTION = True
 with col3:
     clear_disabled = not any(st.session_state["docs"]) and not st.session_state["parsed_response"]
