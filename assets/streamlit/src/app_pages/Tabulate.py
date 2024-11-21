@@ -655,7 +655,7 @@ else:
 st.markdown("")
 col1, col2, col3 = st.columns([0.20, 0.60, 0.20])
 with col1:
-    submit_disabled = not any(st.session_state["docs"]) or not any(st.session_state["attributes"])
+    submit_disabled = not any(st.session_state["docs"])  # or not any(st.session_state["attributes"])
     if st.button(":rocket: Extract attributes", disabled=False, use_container_width=True):
         RUN_EXTRACTION = True
 with col3:
