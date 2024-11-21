@@ -268,26 +268,6 @@ class TabulateAPIConstructs(Construct):
             },
             role=self.lambda_textract_role,
         )
-        ## ********* Multimodal extract lambda *********
-        self.llm_attributes_lambda = _lambda.DockerImageFunction(
-            self,
-            f"{self.stack_name}-attributes-llm-lambda",
-            code=_lambda.DockerImageCode.from_image_asset("./assets/lambda/backend/extract_attributes_llm"),
-            function_name=f"{self.stack_name}-extract-attributes-multimodal",
-            memory_size=3008,
-            timeout=Duration.seconds(QUERY_BEDROCK_TIMEOUT),
-            environment={
-                #"CUSTOMER_ID_TABLE_NAME": self.customer_index_table.table_name,
-                "BUCKET_NAME": self.s3_data_bucket.bucket_name,
-                "BEDROCK_REGION": self.bedrock_region,
-            },
-            role=self.lambda_attributes_role, # TODO consider making a separate role?
-        )
-        self.llm_attributes_lambda.add_alias(
-            "Warm",
-            provisioned_concurrent_executions=0,
-            description="Alias used for Lambda provisioned concurrency",
-        )
 
         ## ********* Create presigned URL *********
         self.presigned_url_lambda = _lambda.Function(
@@ -371,29 +351,40 @@ class TabulateAPIConstructs(Construct):
             description="Alias used for Lambda provisioned concurrency",
         )
 
+        ## ********* Multimodal extract lambda *********
+        self.llm_attributes_lambda = _lambda.DockerImageFunction(
+            self,
+            f"{self.stack_name}-attributes-llm-lambda",
+            code=_lambda.DockerImageCode.from_image_asset("./assets/lambda/backend/extract_attributes_llm"),
+            function_name=f"{self.stack_name}-extract-attributes-multimodal",
+            memory_size=3008,
+            timeout=Duration.seconds(QUERY_BEDROCK_TIMEOUT),
+            environment={
+                #"CUSTOMER_ID_TABLE_NAME": self.customer_index_table.table_name,
+                "BUCKET_NAME": self.s3_data_bucket.bucket_name,
+                "BEDROCK_REGION": self.bedrock_region,
+            },
+            role=self.lambda_attributes_role, # TODO consider making a separate role?
+        )
+        self.llm_attributes_lambda.add_alias(
+            "Warm",
+            provisioned_concurrent_executions=0,
+            description="Alias used for Lambda provisioned concurrency",
+        )
+
         ## ********* Process with extract attriutes llm img *********
-        self.extract_attributes_llm_image = _lambda.Function(
+        self.extract_attributes_llm_image = _lambda.DockerImageFunction(
             self,
             f"{self.stack_name}-textract-attributes-llm-img-lambda",
-            runtime=self._python_runtime,
             code=_lambda.Code.from_asset("./assets/lambda/backend/extract_attributes_llm_image"),
-            handler="extract_attributes_llm_image.lambda_handler",
             function_name=f"{self.stack_name}-textract-attributes-llm-img-lambda",
             memory_size=3008,
             timeout=Duration.seconds(TEXTRACT_TIMEOUT),
             environment={
                 "BUCKET_NAME": self.s3_data_bucket.bucket_name,
-                "TEXTRACT_REGION": self.textract_region,
-                "TABLE_FLATTEN_HEADERS": str(self.table_flatten_headers),
-                "TABLE_REMOVE_COLUMN_HEADERS": str(self.table_remove_column_headers),
-                "TABLE_DUPLICATE_TEXT_IN_MERGED_CELLS": str(self.table_duplicate_text_in_merged_cells),
-                "HIDE_FOOTER_LAYOUT": str(self.hide_footer_layout),
-                "HIDE_HEADER_LAYOUT": str(self.hide_header_layout),
-                "HIDE_PAGE_NUM_LAYOUT": str(self.hide_page_num_layout),
-                "USE_TABLE": str(self.use_table),
+                "BEDROCK_REGION": self.bedrock_region,
             },
-            role=self.lambda_textract_role, # TODO: fix the role
-            layers=self.textract_only_code_layers,
+            role=self.lambda_attributes_role, # TODO consider making a separate role?
         )
         self.extract_attributes_llm_image.add_alias(
             "Warm",
