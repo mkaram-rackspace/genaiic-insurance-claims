@@ -565,7 +565,7 @@ class TabulateAPIConstructs(Construct):
                 iam.PolicyStatement(
                     actions=["Lambda:InvokeFunction"],
                     resources=[
-                        self.extract_attributes_llm_image.function_arn
+                        self.extract_attributes_llm_image.function_arn,
                         self.attributes_lambda.function_arn,
                         self.textract_lambda.function_arn,
                         self.transcribe_lambda.function_arn,
@@ -591,9 +591,9 @@ class TabulateAPIConstructs(Construct):
             id=f"{self.stack_name}-StepFunctions",
             definition_body=sfn.DefinitionBody.from_file("assets/state_machine/tabulate.json"),
             definition_substitutions={
-                "LAMBDA_EXTRACT_ATTRIBUTES_LLM_IMG": self.extract_attributes_llm_image.function_arn, # TODO
+                "LAMBDA_EXTRACT_ATTRIBUTES_LLM_IMG": self.extract_attributes_llm_image.function_arn,
                 "LAMBDA_RUN_TEXTRACT": self.textract_lambda.function_arn,
-                "LAMBDA_RUN_TRANSCRIBE": self.transcribe_lambda.function_arn, # TODO
+                "LAMBDA_RUN_TRANSCRIBE": self.transcribe_lambda.function_arn,
                 "LAMBDA_EXTRACT_ATTRIBUTES": self.attributes_lambda.function_arn,
                 # "LAMBDA_EXTRACT_ATTRIBUTES_LLM": self.llm_attributes_lambda.function_arn,
             },
