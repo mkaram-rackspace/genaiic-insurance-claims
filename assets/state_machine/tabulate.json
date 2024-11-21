@@ -222,7 +222,7 @@
           ],
           "Comment": "Catch Lambda failed execution",
           "ResultPath": "$.error",
-          "Next": "Pass"
+          "End": true
         }
       ],
       "End": true
