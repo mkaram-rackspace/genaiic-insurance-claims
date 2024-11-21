@@ -37,6 +37,8 @@ SUPPORTED_EXTENSIONS = [
     "html",
     "htm",
     "md",
+    "mp3",
+    "wav",
 ]
 
 SUPPORTED_EXTENSIONS_BEDROCK = [
