@@ -3,7 +3,7 @@ from langchain import PromptTemplate
 
 PROMPT_DEFAULT_HEADER = """Extract attributes from the attached images and remember to provide a valid JSON file
 <json>
-{{"Headlights": {
+{"Headlights": {
     "severity_of_damage": "Severe",
     "nature_of_damage": "Collision",
     "description_of_damage": "Both headlights are shattered and non-functional, indicating a high-impact collision."
@@ -13,7 +13,7 @@ PROMPT_DEFAULT_HEADER = """Extract attributes from the attached images and remem
     "nature_of_damage": "Debris",
     "description_of_damage": "The windshield has a large crack caused by flying debris."
     }
-    }}
+    }
 <json>
 """
 

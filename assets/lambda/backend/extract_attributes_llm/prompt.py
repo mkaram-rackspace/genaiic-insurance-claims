@@ -3,7 +3,7 @@ from langchain import PromptTemplate
 
 PROMPT_DEFAULT_HEADER = """Extract attributes from the attached document and remember to provide a valid JSON file in the following format:
 <json>
-{{
+{
   "Police Report Number": "",
   "Date of the incident": "",
   "Time of the incident": "",
@@ -29,7 +29,7 @@ PROMPT_DEFAULT_HEADER = """Extract attributes from the attached document and rem
     "Name": "",
     "Description of injuries and/or damage": ""
   }
-}}
+}
 <json>
    
 
