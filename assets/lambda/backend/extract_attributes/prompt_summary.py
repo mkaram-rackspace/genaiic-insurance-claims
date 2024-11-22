@@ -74,7 +74,7 @@ def load_prompt_template(event) -> PromptTemplate:
     prompt = PROMPT_DEFAULT_HEADER
     for doc in event['body']:
         if 'llm_answer' in doc: # the document is an audio file
-            prompt += PROMPT_JSON_DOC.format(json_doc_placeholder= "victim party narrative: " + doc['llm_answer']['content'])
+            prompt += PROMPT_JSON_DOC.format(json_doc_placeholder="Victim Narrative > " + doc['llm_answer']['content'])
         if 'original_file_name' in doc:
             print(f"the doc is: {doc}")
             if 'raw_answer' in doc and doc['raw_answer']: # should be present from the image file
