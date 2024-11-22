@@ -92,7 +92,7 @@ def invoke_step_function(
         if status == "SUCCEEDED":
             output = json.loads(response["output"])
 
-            groups = re.search("([\\s\\S]*?)<json>([\\s\\S]*?)</json>([\\s\\S]*?)", content)
+            groups = re.search("([\\s\\S]*?)<json>([\\s\\S]*?)</json>([\\s\\S]*?)", output)
             accident_info=json.loads(groups[2])
 
             parsed_response_list = [{
