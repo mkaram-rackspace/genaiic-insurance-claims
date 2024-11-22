@@ -120,7 +120,9 @@ def lambda_handler(event, context):  # noqa: C901
 
     # parse response
     try:
-        response_json = parse_json_string(response["text"])
+        resp = response["text"]
+        resp_sub = resp[resp.index("```json\n{")+9:resp.index("}\n```")]
+        response_json = "{" + resp_sub + "}"
     except Exception as e:
         LOGGER.debug(f"Error parsing response: {e}")
         response_json = {}

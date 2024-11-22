@@ -19,7 +19,6 @@ PROMPT_DEFAULT_HEADER = """You are an AI assistant who is expert of processing c
 """  
 
 PROMPT_JSON_DOC = """
-Document:
 <document>
 <json>
 {json_doc_placeholder}
@@ -52,20 +51,22 @@ def load_prompt_template(event) -> PromptTemplate:
     for doc in event['body']:
         if 'llm_answer' in doc: # the document is an audio file
             prompt += PROMPT_JSON_DOC.format(json_doc_placeholder=doc['llm_answer']['content'])
-        if 'original_file_name' in doc and \
-           re.search("\\.pdf$", doc['original_file_name']) and \
-           re.search("\\.doc$", doc['original_file_name']) and \
-           re.search("\\.docx$", doc['original_file_name']): # the document is a pdf, doc, or docx file
-            # prompt += PROMPT_JSON_DOC.format(json_doc_placeholder=doc['attributes'])
-            pass
-        if 'original_file_name' in doc and \
-           re.search("\\.png$", doc['original_file_name']) and \
-           re.search("\\.jpg$", doc['original_file_name']) and \
-           re.search("\\.jpeg$", doc['original_file_name']): # the document is a png, jpg, or jpeg file
-            prompt += PROMPT_JSON_DOC.format(json_doc_placeholder=doc['raw_answer'])
-        # if 'file_name' in doc.keys():
-        #     if 'attributes' in doc.keys():
-        #         prompt += PROMPT_JSON_DOC.format(json_doc_placeholder=doc['attributes'])
+        if 'original_file_name' in doc:
+            print(f"the doc is: {doc}")
+            if 'raw_answer' in doc and doc['raw_answer']:
+                ans = doc['raw_answer']
+                substr = ans[ans.index("<json>")+7:ans.index("</json>")]
+                substr = substr.replace("\n", "")
+                prom = "{" + substr + "}"
+                prompt += PROMPT_JSON_DOC.format(json_doc_placeholder=prom)
+            if 'answer' in doc and doc['answer']:
+                ans = doc['answer']
+                prom = "{" + ans + "}"
+                prompt += PROMPT_JSON_DOC.format(json_doc_placeholder=prom)
+            if 'attribute' in doc and doc['attribute']:
+                attr = doc['attribute']
+                prom = "{" + attr + "}"
+                prompt += PROMPT_JSON_DOC.format(json_doc_placeholder=prom)
 
     return PromptTemplate(
         template=prompt,
