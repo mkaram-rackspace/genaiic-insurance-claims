@@ -15,6 +15,16 @@ PROMPT_DEFAULT_HEADER = """You are an AI assistant who is expert of processing c
  
   Ensure that the extracted data is concentrated on car damage and evidence, omitting any unnecessary comments or information. Your summary should be clear, concise, and structured to facilitate a fair assessment of the accident and streamline the claims process.
 
+  Format the output as JSON of attributes: 
+  <json>
+    {{
+        "carOwnerName": "",
+        "carOwnerInsurancePolicy": "",
+        "damageDetails": "",
+        "estimatedRepairCost": "",
+        "finalClaimSummary": "",
+    }}
+    </json>
   Document:
 """  
 

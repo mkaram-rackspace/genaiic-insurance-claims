@@ -15,6 +15,7 @@ import streamlit as st
 
 import logging
 import sys
+import re
 
 API_URI = os.environ.get("API_URI")
 STATE_MACHINE_ARN = os.environ.get("STATE_MACHINE_ARN")
@@ -90,11 +91,32 @@ def invoke_step_function(
 
         if status == "SUCCEEDED":
             output = json.loads(response["output"])
-            parsed_response = {
-                "Summary" : output["llm_answer"]["raw_answer"]
-            } # output["llm_answer"]["answer"]
-            # parsed_response["_file_name"] = output["llm_answer"]["raw_answer"] # output["llm_answer"]["original_file_name"].split("/", 1)[-1]
-            st.session_state["parsed_response"].append(parsed_response)
+
+            groups = re.search("([\\s\\S]*?)\\`\\`\\`json([\\s\\S]*?)\\`\\`\\`([\\s\\S]*?)", content)
+            accident_info=json.loads(groups[2])
+
+            parsed_response_list = [{
+                    "Car Owner": accident_info["carOwnerName"]
+                }, {
+                    "Insurance Policy": accident_info["carOwnerInsurancePolicy"]
+                }, {
+                    "Damage Details": accident_info["damageDetails"]
+                }, {
+                    "Estimated Repair Cost": accident_info["estimatedRepairCost"]
+                }, {
+                    "Final Claim Summary": accident_info["finalClaimSummary"]
+                }
+                
+            ]
+            st.session_state["parsed_response"].extend(parsed_response_list)
+            # parsed_response = {
+            #     "Summary" : output["llm_answer"]["raw_answer"]
+            # }
+            # st.session_state["parsed_response"].append(parsed_response)
+
+
+
+
             st.session_state["raw_response"].append(output["llm_answer"]["raw_answer"])
             # for output in outputs:
             #     LOGGER.info(f"output: {output}")

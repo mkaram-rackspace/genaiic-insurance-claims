@@ -125,6 +125,7 @@ def lambda_handler(event, context):  # noqa: C901
                 "file_key": file_key,
                 "csv_tables": csv_tables,
                 "original_file_name": file_name,
+                "content": doc_text
             }
         ),
     }
