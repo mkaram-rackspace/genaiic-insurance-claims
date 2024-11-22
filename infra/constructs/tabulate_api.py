@@ -342,7 +342,7 @@ class TabulateAPIConstructs(Construct):
                 "HIDE_PAGE_NUM_LAYOUT": str(self.hide_page_num_layout),
                 "USE_TABLE": str(self.use_table),
             },
-            role=self.lambda_textract_role, # TODO: fix the role
+            role=self.lambda_transcribe_role,
             layers=self.textract_only_code_layers,
         )
         self.transcribe_lambda.add_alias(
@@ -420,6 +420,16 @@ class TabulateAPIConstructs(Construct):
             ),
         )
 
+
+        self.lambda_transcribe_role = iam.Role(
+            self,
+            f"{self.stack_name}-transcribe-role",
+            role_name=f"{self.stack_name}-transcribe-role",
+            assumed_by=iam.CompositePrincipal(
+                iam.ServicePrincipal("lambda.amazonaws.com"),
+            ),
+        )
+
         ## ********* Cloudwatch *********
         cloudwatch_access_docpolicy = iam.PolicyDocument(
             statements=[
@@ -443,6 +453,7 @@ class TabulateAPIConstructs(Construct):
         )
         self.lambda_presigned_url_role.attach_inline_policy(self.cloudwatch_access_policy)
         self.lambda_textract_role.attach_inline_policy(self.cloudwatch_access_policy)
+        self.lambda_transcribe_role.attach_inline_policy(self.cloudwatch_access_policy)
         self.lambda_attributes_role.attach_inline_policy(self.cloudwatch_access_policy)
 
         # Added to suppressing list given Resource::arn:aws:logs:<AWS::Region>:<AWS::AccountId>:log-group:*
@@ -472,6 +483,26 @@ class TabulateAPIConstructs(Construct):
         )
         self.lambda_textract_role.attach_inline_policy(textract_access_policy)
         self.nag_suppressed_resources.append(textract_access_policy)
+
+        ## ********* Transcribe *********
+        transcribe_access_docpolicy = iam.PolicyDocument(
+            statements=[
+                iam.PolicyStatement(
+                    actions=[
+                        "transcribe:*", # TODO: narrow down the necessary actions
+                    ],
+                    resources=["*"],
+                )
+            ]
+        )
+        transcribe_access_policy = iam.Policy(
+            self,
+            f"{self.stack_name}-transcribe-access-policy",
+            policy_name=f"{self.stack_name}-transcribe-access-policy",
+            document=transcribe_access_docpolicy,
+        )
+        self.lambda_transcribe_role.attach_inline_policy(transcribe_access_policy)
+        self.nag_suppressed_resources.append(transcribe_access_policy)
 
         ## ********* Bedrock *********
         bedrock_access_docpolicy = iam.PolicyDocument(
@@ -535,6 +566,7 @@ class TabulateAPIConstructs(Construct):
         self.lambda_attributes_role.attach_inline_policy(self.s3_read_write_files_policy)
         self.lambda_presigned_url_role.attach_inline_policy(self.s3_read_write_files_policy)
         self.lambda_textract_role.attach_inline_policy(self.s3_read_write_files_policy)
+        self.lambda_transcribe_role.attach_inline_policy(self.s3_read_write_files_policy)
 
     def create_stepfunction_role(self: str):
         ## ********* IAM Roles *********
