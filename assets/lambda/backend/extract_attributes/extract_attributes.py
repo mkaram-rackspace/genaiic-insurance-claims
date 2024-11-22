@@ -88,44 +88,15 @@ def lambda_handler(event, context):  # noqa: C901
 
     LOGGER.debug(f"event: {event}")
 
-    # parse event
-    if "requestContext" in event:
-        LOGGER.info("Received HTTP request.")
-        body = json.loads(event["body"])
-    else:  # step functions invocation
-        body = event["body"]
-    LOGGER.info(f"Received input: {body}")
-
-    # load document text
-    if "document" not in body:
-        s3 = boto3.resource("s3")
-        content_object = s3.Object(S3_BUCKET, body["file_key"])
-        body["document"] = content_object.get()["Body"].read().decode("utf-8")
-    LOGGER.info(f"Loaded text with {len(body['document'])} chars: {body['document'][:100]}...")
-
     # get model ID and params
-    GENERATOR_CONFIG["temperature"] = body["model_params"]["temperature"]
-    model_id = body["model_params"]["model_id"]
+    GENERATOR_CONFIG["temperature"] = 0
+    model_id = "anthropic.claude-3-sonnet-20240229-v1:0"
 
     if model_id.split(".")[0] == "meta":
         GENERATOR_CONFIG["max_tokens"] = 2048
 
     model_params = get_model_params(model_id=model_id, params=GENERATOR_CONFIG)
     LOGGER.info(f"LLM parameters: {model_id}; {model_params}")
-
-    # extract document and attributes
-    document = body["document"]
-
-    attributes = body["attributes"]
-    instructions = body.get("instructions", "")
-    few_shots = body.get("few_shots", [])
-    LOGGER.info(f"few_shots : {few_shots}")
-    attributes_str = ""
-    for i in range(len(attributes)):
-        attributes_str += f"{i+1}. {attributes[i]['name']}: {attributes[i]['description']}"
-        if "type" in attributes[i] and attributes[i]["type"].lower() != "auto":
-            attributes_str += f" (must be {attributes[i]['type'].lower()})."
-        attributes_str += "\n"
 
     # set up LLM
     llm = ChatBedrock(
@@ -138,25 +109,12 @@ def lambda_handler(event, context):  # noqa: C901
     prompt_template = load_prompt_template(event)
     LOGGER.info(f"Prompt: {prompt_template}")
 
-    document = truncate_document(
-        document=document,
-        token_count_total=token_count_total,
-        model=model_id,
-        num_token_prompt=token_count_total - token_count_doc,
-        max_token_model=MAX_DOC_LENGTH_DIC[model_id] * 0.75,
-    )
-
-    attributes_str = "claimer name, car model, accident description"
-    prompt_variables = {
-        "attributes": attributes_str,
-    }
-
-    if instructions.strip():
-        prompt_variables["instructions"] = instructions
-
     # run entity extraction
     LOGGER.info(f"Calling the LLM {model_id} to extract attributes...")
     llm_chain = LLMChain(llm=llm, prompt=prompt_template, verbose=False)
+    prompt_variables = {
+        "request": "Summarize the car accident with a narrative",
+    }
     response = llm_chain.invoke(prompt_variables)
     LOGGER.info(f"LLM response: {response}")
 
@@ -171,17 +129,8 @@ def lambda_handler(event, context):  # noqa: C901
     json_data = json.dumps(
         {
             "answer": response_json,
-            "raw_answer": response["text"],
-            "file_key": body["file_key"],
-            "original_file_name": body["original_file_name"],
+            "raw_answer": response["text"]
         }
-    )
-
-    S3_CLIENT.put_object(
-        Body=json_data,
-        Bucket=S3_BUCKET,
-        Key=f"{PREFIX_ATTRIBUTES}/{body['file_key'].split('/', 1)[-1].removesuffix('.txt')}.json",
-        ContentType="application/json",
     )
 
     return {

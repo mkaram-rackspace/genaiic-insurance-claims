@@ -258,11 +258,7 @@
     },
     "PassState": {
       "Type": "Pass",
-      "End": true,
-      "Parameters": {
-        "file_name.$": "$.file_name",
-        "error.$": "$.error"
-      }
+      "End": true
     }
   }
 }

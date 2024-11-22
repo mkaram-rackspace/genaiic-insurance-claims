@@ -4,6 +4,7 @@ File content:
 """
 
 from langchain import PromptTemplate
+import re
 
 PROMPT_DEFAULT_HEADER = """You are an AI assistant who is expert of processing car accident insurance claims. Carefully read the document given below in <document><json></json></document> tags in. Your task is analyzing the documents and extract valuable information to facilitate the claim process. Your goal is to provide a concise summary in JSON format, focusing on four main aspects: car owner information, aggregated car damage details, estimated part cost to fix the car damages and final summarization.
 
@@ -49,6 +50,24 @@ def load_prompt_template(event) -> PromptTemplate:
     # prepare the prompt
     prompt = PROMPT_DEFAULT_HEADER
     for doc in event['body']:
-        prompt += PROMPT_JSON_DOC.format(json_doc_placeholder=doc['attributes'])
+        if 'llm_answer' in doc: # the document is an audio file
+            prompt += PROMPT_JSON_DOC.format(json_doc_placeholder=doc['llm_answer']['content'])
+        if 'original_file_name' in doc and \
+           re.search("\\.pdf$", doc['original_file_name']) and \
+           re.search("\\.doc$", doc['original_file_name']) and \
+           re.search("\\.docx$", doc['original_file_name']): # the document is a pdf, doc, or docx file
+            # prompt += PROMPT_JSON_DOC.format(json_doc_placeholder=doc['attributes'])
+            pass
+        if 'original_file_name' in doc and \
+           re.search("\\.png$", doc['original_file_name']) and \
+           re.search("\\.jpg$", doc['original_file_name']) and \
+           re.search("\\.jpeg$", doc['original_file_name']): # the document is a png, jpg, or jpeg file
+            prompt += PROMPT_JSON_DOC.format(json_doc_placeholder=doc['raw_answer'])
+        # if 'file_name' in doc.keys():
+        #     if 'attributes' in doc.keys():
+        #         prompt += PROMPT_JSON_DOC.format(json_doc_placeholder=doc['attributes'])
 
-    return prompt
+    return PromptTemplate(
+        template=prompt,
+        # input_variables=input_variables,
+    )
