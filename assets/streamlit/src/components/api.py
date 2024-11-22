@@ -13,11 +13,18 @@ import boto3
 import requests
 import streamlit as st
 
+import logging
+import sys
+
 API_URI = os.environ.get("API_URI")
 STATE_MACHINE_ARN = os.environ.get("STATE_MACHINE_ARN")
 
 REQUEST_TIMEOUT = 900
 
+LOGGER = logging.Logger("Streamlit::API", level=logging.DEBUG)
+HANDLER = logging.StreamHandler(sys.stdout)
+HANDLER.setFormatter(logging.Formatter("%(levelname)s | %(name)s | %(message)s"))
+LOGGER.addHandler(HANDLER)
 
 def invoke_step_function(
     file_keys: list[str],
@@ -82,12 +89,25 @@ def invoke_step_function(
             break
 
         if status == "SUCCEEDED":
-            outputs = json.loads(response["output"])
-            for output in outputs:
-                parsed_response = output["llm_answer"]["raw_answer"] # output["llm_answer"]["answer"]
-                parsed_response["_file_name"] = output["llm_answer"]["raw_answer"] # output["llm_answer"]["original_file_name"].split("/", 1)[-1]
-                st.session_state["parsed_response"].append(parsed_response)
-                st.session_state["raw_response"].append(output["llm_answer"]["raw_answer"])
+            output = json.loads(response["output"])
+            parsed_response = {
+                "Summary" : output["llm_answer"]["raw_answer"]
+            } # output["llm_answer"]["answer"]
+            parsed_response["_file_name"] = output["llm_answer"]["raw_answer"] # output["llm_answer"]["original_file_name"].split("/", 1)[-1]
+            st.session_state["parsed_response"].append(parsed_response)
+            st.session_state["raw_response"].append(output["llm_answer"]["raw_answer"])
+            # for output in outputs:
+            #     LOGGER.info(f"output: {output}")
+            #     # llm_answer = output["llm_answer"]
+            #     # LOGGER.info(f"llm_answer: {llm_answer}")
+            #     # raw_answer = output["llm_answer"]["raw_answer"]
+            #     # LOGGER.info(f"raw_answer: {raw_answer}")
+            #     parsed_response = {
+            #         "Summary" : output # ["llm_answer"]["raw_answer"]
+            #     } # output["llm_answer"]["answer"]
+            #     parsed_response["_file_name"] = output #["llm_answer"]["raw_answer"] # output["llm_answer"]["original_file_name"].split("/", 1)[-1]
+            #     st.session_state["parsed_response"].append(parsed_response)
+            #     st.session_state["raw_response"].append(output) #["llm_answer"]["raw_answer"])
             break
 
 
