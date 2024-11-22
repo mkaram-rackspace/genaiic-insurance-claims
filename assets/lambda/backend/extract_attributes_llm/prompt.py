@@ -1,39 +1,7 @@
 from langchain import PromptTemplate
 
 
-PROMPT_DEFAULT_HEADER = """Extract attributes from the attached document and remember to provide a valid JSON file in the following format:
-<json>
-{
-  "Police Report Number": "",
-  "Date of the incident": "",
-  "Time of the incident": "",
-  "Location of the incident": "",
-  "Vehicle 1 (Guilty party) details": {
-    "Driver's Name": "",
-    "Vehicle Make and Model": "",
-    "License Plate Number": "",
-    "Insurance Information": "",
-    "Description of the vehicle's condition": "",
-    "Injuries sustained by the driver/passengers": ""
-  },
-  "Vehicle 2 (Victim party) details": {
-    "Driver's Name": "",
-    "Vehicle Make and Model": "",
-    "License Plate Number": "",
-    "Insurance Information": "",
-    "Description of the vehicle's condition": "",
-    "Injuries sustained by the driver/passengers": ""
-  },
-  "Description of the accident with relevant details": "",
-  "Any third-party involvement (if applicable)": {
-    "Name": "",
-    "Description of injuries and/or damage": ""
-  }
-}
-<json>
-   
-
-"""
+PROMPT_DEFAULT_HEADER = """Extract attributes from the attached document and remember to provide a valid JSON file in the following format:"""
 
 
 PROMPT_DEFAULT_TAIL = """

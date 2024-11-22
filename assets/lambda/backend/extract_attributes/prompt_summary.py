@@ -79,7 +79,9 @@ def load_prompt_template(event) -> PromptTemplate:
             #     prompt += PROMPT_JSON_DOC.format(json_doc_placeholder=prom)
             if 'content' in doc and doc['content']: # should be present from the pdf file
                 content = doc['content']
-                prom = "{" + content + "}"
+                substr = content[content.index("<json>")+7:content.index("</json>")]
+                substr = substr.replace("\n", "")
+                prom = "{" + substr + "}"
                 prompt += PROMPT_JSON_DOC.format(json_doc_placeholder=prom)
 
     return PromptTemplate(
