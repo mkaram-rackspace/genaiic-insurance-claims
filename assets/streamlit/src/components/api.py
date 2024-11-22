@@ -84,7 +84,9 @@ def invoke_step_function(
         if status == "SUCCEEDED":
             outputs = json.loads(response["output"])
             for output in outputs:
-                parsed_response = output["llm_answer"]["raw_answer"] # output["llm_answer"]["answer"]
+                parsed_response = {
+                    "Summary" : output["llm_answer"]["raw_answer"]
+                } # output["llm_answer"]["answer"]
                 parsed_response["_file_name"] = output["llm_answer"]["raw_answer"] # output["llm_answer"]["original_file_name"].split("/", 1)[-1]
                 st.session_state["parsed_response"].append(parsed_response)
                 st.session_state["raw_response"].append(output["llm_answer"]["raw_answer"])
