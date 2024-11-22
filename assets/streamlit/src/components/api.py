@@ -96,20 +96,20 @@ def invoke_step_function(
             accident_info=json.loads(groups[2])
 
             parsed_response_list = [{
-                    "Asset": "Car Owner",
-                    "Description": accident_info["carOwnerName"]
+                    "Key": "Car Owner",
+                    "Value": accident_info["carOwnerName"]
                 }, {
-                    "Asset": "Insurance Policy",
-                    "Description": accident_info["carOwnerInsurancePolicy"]
+                    "Key": "Insurance Policy",
+                    "Value": accident_info["carOwnerInsurancePolicy"]
                 }, {
-                    "Asset": "Damage Details",
-                    "Description": accident_info["damageDetails"]
+                    "Key": "Damage Details",
+                    "Value": accident_info["damageDetails"]
                 }, {
-                    "Asset": "Estimated Repair Cost",
-                    "Description": accident_info["estimatedRepairCost"]
+                    "Key": "Estimated Repair Cost",
+                    "Value": accident_info["estimatedRepairCost"]
                 }, {
-                    "Asset": "Final Claim Summary",
-                    "Description": accident_info["finalClaimSummary"]
+                    "Key": "Final Claim Summary",
+                    "Value": accident_info["finalClaimSummary"]
                 }
                 
             ]

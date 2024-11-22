@@ -332,7 +332,7 @@ def process_response(parsed_response: list, wide=True) -> dict:
 
     else:
         docs = [idx + 1 for idx in list(input_dict.keys())]
-        output_dict["_doc"] = docs
+        output_dict["_id"] = docs
 
         attributes = set()
         for v in input_dict.values():
@@ -377,7 +377,7 @@ def run_extraction() -> None:
             with st.spinner(status_message):
                 api.invoke_step_function(
                     file_keys=file_keys,
-                    attributes=st.session_state["attributes"],
+                    attributes=[],
                     instructions=st.session_state.get("instructions", ""),
                     few_shots=st.session_state.get("few_shots", []),
                     model_id=st.session_state["model_id"],
@@ -655,7 +655,7 @@ else:
 st.markdown("")
 col1, col2, col3 = st.columns([0.20, 0.60, 0.20])
 with col1:
-    submit_disabled = not any(st.session_state["docs"]) or not any(st.session_state["attributes"])
+    submit_disabled = not any(st.session_state["docs"]) # or not any(st.session_state["attributes"])
     if st.button(":rocket: Extract attributes", disabled=False, use_container_width=True):
         RUN_EXTRACTION = True
 with col3:

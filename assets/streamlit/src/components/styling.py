@@ -44,6 +44,10 @@ section.main > div {max-width:800px}
     text-align: justify;
     background-color: rgba(180,200,250,0.15);
 }
+table th, table td {
+    white-space: normal !important;
+    word-wrap: break-word;
+}
 </style>
 """
 
