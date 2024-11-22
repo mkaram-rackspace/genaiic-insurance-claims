@@ -36,7 +36,7 @@ def lambda_handler(event, context):
     source_key = body["file_name"]
     
     # Get environment variables
-    output_bucket = os.environ['OUTPUT_BUCKET']
+    output_bucket = S3_BUCKET
     
     try:
         # Create a unique job name (using timestamp to avoid conflicts)
