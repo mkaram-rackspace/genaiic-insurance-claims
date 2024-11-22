@@ -63,19 +63,23 @@ def load_prompt_template(event) -> PromptTemplate:
             prompt += PROMPT_JSON_DOC.format(json_doc_placeholder=doc['llm_answer']['content'])
         if 'original_file_name' in doc:
             print(f"the doc is: {doc}")
-            if 'raw_answer' in doc and doc['raw_answer']:
+            if 'raw_answer' in doc and doc['raw_answer']: # should be present from the image file
                 ans = doc['raw_answer']
                 substr = ans[ans.index("<json>")+7:ans.index("</json>")]
                 substr = substr.replace("\n", "")
                 prom = "{" + substr + "}"
                 prompt += PROMPT_JSON_DOC.format(json_doc_placeholder=prom)
-            if 'answer' in doc and doc['answer']:
-                ans = doc['answer']
-                prom = "{" + ans + "}"
-                prompt += PROMPT_JSON_DOC.format(json_doc_placeholder=prom)
-            if 'attribute' in doc and doc['attribute']:
-                attr = doc['attribute']
-                prom = "{" + attr + "}"
+            # if 'answer' in doc and doc['answer']:
+            #     ans = doc['answer']
+            #     prom = "{" + ans + "}"
+            #     prompt += PROMPT_JSON_DOC.format(json_doc_placeholder=prom)
+            # if 'attribute' in doc and doc['attribute']:
+            #     attr = doc['attribute']
+            #     prom = "{" + attr + "}"
+            #     prompt += PROMPT_JSON_DOC.format(json_doc_placeholder=prom)
+            if 'content' in doc and doc['content']: # should be present from the pdf file
+                content = doc['content']
+                prom = "{" + content + "}"
                 prompt += PROMPT_JSON_DOC.format(json_doc_placeholder=prom)
 
     return PromptTemplate(
