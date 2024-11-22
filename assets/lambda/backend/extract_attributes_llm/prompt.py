@@ -1,15 +1,38 @@
 from langchain import PromptTemplate
 
 
-PROMPT_DEFAULT_HEADER = """Extract attributes from the attached images and remember to provide a valid JSON file in the following format:
+PROMPT_DEFAULT_HEADER = """Extract attributes from the attached document and remember to provide a valid JSON file in the following format:
 <json>
 {{
-    "attribute_1": "attribute_1 value",
-    "attribute_2": "attribute_2 value",
-    ...
-    "attribute_n": "attribute_n value",
+  "Police Report Number": "",
+  "Date of the incident": "",
+  "Time of the incident": "",
+  "Location of the incident": "",
+  "Vehicle 1 (Guilty party) details": {
+    "Driver's Name": "",
+    "Vehicle Make and Model": "",
+    "License Plate Number": "",
+    "Insurance Information": "",
+    "Description of the vehicle's condition": "",
+    "Injuries sustained by the driver/passengers": ""
+  },
+  "Vehicle 2 (Victim party) details": {
+    "Driver's Name": "",
+    "Vehicle Make and Model": "",
+    "License Plate Number": "",
+    "Insurance Information": "",
+    "Description of the vehicle's condition": "",
+    "Injuries sustained by the driver/passengers": ""
+  },
+  "Description of the accident with relevant details": "",
+  "Any third-party involvement (if applicable)": {
+    "Name": "",
+    "Description of injuries and/or damage": ""
+  }
 }}
-</json>
+<json>
+   
+
 """
 
 
@@ -59,39 +82,11 @@ Note that some attributes are not directly stated in the document, but their val
 Do your best to extract a full value for each requested attribute from the document.
 If provided, you must also follow the additional instructions in <instructions></instructions>.
 Think step by step. First, summarize your thoughts in 2-3 sentences using <thinking></thinking> tags. Next, output the JSON in <json></json> tags. Do NOT include any other information in the answer. Remember that the response MUST be a valid JSON file.
-
-<example>
-<document_text_extracted_from_images>
-I would like to apologize for the delay in the delivery of the ordered goods. Unfortunately, there was a delay due to a technical problem in our warehouse.
-Your order 754263 has now been shipped and you should receive the goods within the next 2-3 business days. I ask for your understanding regarding these inconveniences.
-Kind regards,
-Nikita Schulz
-Customer Service ABC GmbH
-</document_text_extracted_from_images>
-
-Attributes to be extracted:
-<attributes>
-1. customer_name: name of the customer who wrote the email
-2. shipment_delay_complaint: whether the email is from a customer complaining about shipment delays
-3. urgency_score: how soon we should react to the customer email on a scale from 0 to 1
-</attributes>
-
-Output:
-<thinking>
-The document mentions the customer name in the email signature: Nikita Schulz. In the email, the customer is complaining about shipment delays. There are no data points that indicate very high urgency, so I will assign a neutral score of 0.5/
-</thinking>
-<json>
-{{
-    "customer_name": "Nikita Schulz",
-    "shipment_delay_complaint": true,
-    "urgency_score": 0.5
-}}
-</json>
-</example>
+ 
 """
 
 
-def load_prompt_template(num_few_shots: int = 0, instructions: str = "") -> PromptTemplate:
+def load_prompt_template() -> PromptTemplate:
     """
     Creates LangChain prompt template
 
@@ -109,29 +104,13 @@ def load_prompt_template(num_few_shots: int = 0, instructions: str = "") -> Prom
     """
 
     # prepare input variables
-    input_variables = ["document", "attributes"]
-    for i in range(num_few_shots):
-        input_variables += [f"few_shot_input_{i}", f"few_shot_output_{i}"]
+    input_variables = ["document"]
 
     # prepare the prompt
     prompt = PROMPT_DEFAULT_HEADER
-    for i in range(num_few_shots):
-        prompt += PROMPT_FEW_SHOT.format(
-            few_shot_input_placeholder="{" + f"few_shot_input_{i}" + "}",
-            few_shot_output_placeholder="{" + f"few_shot_output_{i}" + "}",
-        )
-    prompt += PROMPT_DEFAULT_TAIL
 
-    # add instructions
-    if instructions.strip():
-        prompt = prompt.replace(
-            "<document_level_instructions_placeholder>",
-            PROMPT_INSTRUCTIONS,
-        )
-        input_variables += "instructions"
-    else:
-        prompt = prompt.replace(
-            "\n<document_level_instructions_placeholder>\n", "\n")
+
+
 
     return PromptTemplate(
         template=prompt,

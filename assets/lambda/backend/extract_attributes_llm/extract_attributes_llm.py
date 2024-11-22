@@ -101,9 +101,9 @@ def lambda_handler(event, context):
 
     file_key = body.get("file_name")
     client_id = body.get("client_id")
-    attributes = body["attributes"]
-    instructions = body.get("instructions", "")
-    few_shots = body.get("few_shots", [])
+    # attributes = body["attributes"]
+    # instructions = body.get("instructions", "")
+    # few_shots = body.get("few_shots", [])
     # prompt = body.get("prompt", PROMPT)
     # system_prompt = body.get("system_prompt", SYSTEM_PROMPT)
     # get fixed model params
@@ -131,13 +131,13 @@ def lambda_handler(event, context):
 
     LOGGER.info(f"MODEL_PARAMS: {model_params.to_dict()}")
 
-    prompt_template = load_prompt_template(num_few_shots=len(few_shots), instructions=instructions)
+    prompt_template = load_prompt_template()
     LOGGER.info(f"Prompt template: {prompt_template}")
 
     filled_template = filled_prompt(
-        few_shots=few_shots,
-        attributes=attributes,
-        instructions=instructions,
+        # few_shots=few_shots,
+        # attributes=attributes,
+        # instructions=instructions,
         template=prompt_template.template,
     )
 
