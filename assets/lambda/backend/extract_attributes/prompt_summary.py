@@ -37,6 +37,7 @@ PROMPT_DEFAULT_HEADER = """You are an AI assistant who is expert of processing c
         "VictimPartyLicensePlateNumber": "",
         "VictimPartyVehicleMakeAndModel": "",
         "VictimPartyInjuries": "",
+        "VictimPartyNarrative": "",
     }}
     </json>
   Document:
