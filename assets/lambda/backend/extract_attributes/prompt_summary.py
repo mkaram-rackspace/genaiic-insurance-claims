@@ -18,11 +18,25 @@ PROMPT_DEFAULT_HEADER = """You are an AI assistant who is expert of processing c
   Format the output as JSON of attributes: 
   <json>
     {{
-        "carOwnerName": "",
-        "carOwnerInsurancePolicy": "",
-        "damageDetails": "",
-        "estimatedRepairCost": "",
-        "finalClaimSummary": "",
+        "policeReportNumber": "",
+        "dateOfIncident": "",
+        "LocationOfIncident": "",
+        "guiltyCarOwnerName": "",
+        "guiltyCarOwnerInsurancePolicy": "",
+        "guiltyCarOwnerDamageDetails": "",
+        "guiltyCarOwnerEstimatedRepairCost": "",
+        "guiltyCarOwnerFinalClaimSummary": "",
+        "guiltyPartyLicensePlateNumber": "",
+        "guiltyPartyVehicleMakeAndModel": "",
+        "guiltyPartyInjuries": "",
+        "guiltyPartyNarrative": "",
+        "victimCarOwnerInsurancePolicy": "",
+        "victimCarOwnerDamageDetails": "",
+        "victimCarOwnerEstimatedRepairCost": "",
+        "victimCarOwnerFinalClaimSummary": "",
+        "victimPartyLicensePlateNumber": "",
+        "victimPartyVehicleMakeAndModel": "",
+        "victimPartyInjuries": "",
     }}
     </json>
   Document:

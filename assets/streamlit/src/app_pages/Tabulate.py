@@ -332,7 +332,7 @@ def process_response(parsed_response: list, wide=True) -> dict:
 
     else:
         docs = [idx + 1 for idx in list(input_dict.keys())]
-        output_dict["_id"] = docs
+        # output_dict["_id"] = docs
 
         attributes = set()
         for v in input_dict.values():

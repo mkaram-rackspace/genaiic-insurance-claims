@@ -27,6 +27,18 @@ HANDLER = logging.StreamHandler(sys.stdout)
 HANDLER.setFormatter(logging.Formatter("%(levelname)s | %(name)s | %(message)s"))
 LOGGER.addHandler(HANDLER)
 
+def camel_to_sentence(camel_str):
+    # Split the string into words based on capitalized letters
+    words = re.findall(r'[A-Z][^A-Z]*', camel_str)
+
+    # Capitalize the first letter of each word
+    words = [word.capitalize() for word in words]
+
+    # Join the words with spaces
+    sentence = ' '.join(words)
+
+    return sentence
+
 def invoke_step_function(
     file_keys: list[str],
     attributes: list[dict],
@@ -95,24 +107,33 @@ def invoke_step_function(
             groups = re.search("([\\s\\S]*?)<json>([\\s\\S]*?)</json>([\\s\\S]*?)", output["llm_answer"]["raw_answer"])
             accident_info=json.loads(groups[2])
 
-            parsed_response_list = [{
-                    "Key": "Car Owner",
-                    "Value": accident_info["carOwnerName"]
-                }, {
-                    "Key": "Insurance Policy",
-                    "Value": accident_info["carOwnerInsurancePolicy"]
-                }, {
-                    "Key": "Damage Details",
-                    "Value": accident_info["damageDetails"]
-                }, {
-                    "Key": "Estimated Repair Cost",
-                    "Value": accident_info["estimatedRepairCost"]
-                }, {
-                    "Key": "Final Claim Summary",
-                    "Value": accident_info["finalClaimSummary"]
-                }
+            parsed_response_list = []
+
+            for key in accident_info.keys():
+                 parsed_response_list.append({
+                    "Key": camel_to_sentence(key),
+                    "Value": accident_info[key]
+                })
+
+
+            # parsed_response_list = [{
+            #         "Key": "Car Owner",
+            #         "Value": accident_info["carOwnerName"]
+            #     }, {
+            #         "Key": "Insurance Policy",
+            #         "Value": accident_info["carOwnerInsurancePolicy"]
+            #     }, {
+            #         "Key": "Damage Details",
+            #         "Value": accident_info["damageDetails"]
+            #     }, {
+            #         "Key": "Estimated Repair Cost",
+            #         "Value": accident_info["estimatedRepairCost"]
+            #     }, {
+            #         "Key": "Final Claim Summary",
+            #         "Value": accident_info["finalClaimSummary"]
+            #     }
                 
-            ]
+            # ]
             st.session_state["parsed_response"].extend(parsed_response_list)
             # parsed_response = {
             #     "Summary" : output["llm_answer"]["raw_answer"]
