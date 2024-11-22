@@ -9,9 +9,12 @@ from urllib.parse import unquote_plus
 #########################
 
 S3_BUCKET = os.environ["BUCKET_NAME"]
-PREFIX_PROCESSED = "processed"
 
-S3_CLIENT = boto3.client("s3")
+LOGGER = logging.Logger("TEXTRACT", level=logging.DEBUG)
+HANDLER = logging.StreamHandler(sys.stdout)
+HANDLER.setFormatter(logging.Formatter("%(levelname)s | %(name)s | %(message)s"))
+LOGGER.addHandler(HANDLER)
+
 
 def lambda_handler(event, context):
     # parse event
